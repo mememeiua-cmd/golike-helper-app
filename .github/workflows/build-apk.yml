@@ -16,21 +16,14 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Download gradle-wrapper.jar
+    - name: Install Gradle 8.4
       run: |
-        mkdir -p gradle/wrapper
-        curl -sL "https://github.com/gradle/gradle/releases/download/v8.4.0/gradle-8.4-bin.zip" -o /tmp/gradle.zip
-        unzip -j /tmp/gradle.zip "gradle-8.4/lib/gradle-launcher-8.4.jar" -d /tmp/ || true
-        curl -sL "https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradle/wrapper/gradle-wrapper.jar" \
-          -o gradle/wrapper/gradle-wrapper.jar 2>/dev/null || \
-        curl -sL "https://services.gradle.org/distributions/gradle-8.4-wrapper.jar.sha256" -o /dev/null && \
-        curl -sL "https://raw.githubusercontent.com/nicholasgasior/android-hello-world/master/gradle/wrapper/gradle-wrapper.jar" \
-          -o gradle/wrapper/gradle-wrapper.jar
-        echo "Jar size: $(du -sh gradle/wrapper/gradle-wrapper.jar)"
-        chmod +x gradlew
+        wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip -P /tmp/
+        unzip -q /tmp/gradle-8.4-bin.zip -d /opt/gradle
+        echo "/opt/gradle/gradle-8.4/bin" >> $GITHUB_PATH
 
     - name: Build Debug APK
-      run: ./gradlew assembleDebug --stacktrace
+      run: gradle assembleDebug --stacktrace
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
@@ -59,4 +52,3 @@ jobs:
         files: app/build/outputs/apk/debug/app-debug.apk
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
